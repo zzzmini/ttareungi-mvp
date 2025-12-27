@@ -1,0 +1,172 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    mem_limit: 256m
+    networks:
+      - ttareungi-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_HEAP_OPTS: "-Xmx256M -Xms256M"
+    mem_limit: 512m
+    networks:
+      - ttareungi-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  # Kafka UI는 운영에서 선택적
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      kafka:
+        condition: service_healthy
+    expose:
+      - "8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: ttareungi
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    mem_limit: 256m
+    networks:
+      - ttareungi-network
+
+  producer:
+    build: ./producer
+    container_name: producer
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SEOUL_API_KEY=${SEOUL_API_KEY}
+      - INTERVAL_SECONDS=${INTERVAL_SECONDS:-60}
+    restart: unless-stopped
+    mem_limit: 128m
+    networks:
+      - ttareungi-network
+
+  spark-master:
+    image: public.ecr.aws/bitnami/spark:3.5.1
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    expose:
+      - "8080"
+      - "7077"
+    mem_limit: 512m
+    networks:
+      - ttareungi-network
+
+  spark-worker:
+    image: public.ecr.aws/bitnami/spark:3.5.1
+    container_name: spark-worker
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=2
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    mem_limit: 1G
+    networks:
+      - ttareungi-network
+
+  spark-consumer:
+    build:
+      context: ./spark
+    container_name: spark-consumer
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      spark-master:
+        condition: service_started
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC: ttareungi-realtime
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - ./ml/models:/app/models
+    mem_limit: 512m
+    networks:
+      - ttareungi-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - ttareungi-network
+
+  api:
+    build:
+      context: ./api
+    container_name: api
+    depends_on:
+      - redis
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    expose:  # 외부 포트 노출 제거
+      - "8000"
+    mem_limit: 256m
+    restart: unless-stopped
+    networks:
+      - ttareungi-network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    depends_on:
+      - api
+    ports:
+      - "80:80"  # 운영 환경에서는 80 포트만 노출
+    mem_limit: 128m
+    restart: unless-stopped
+    networks:
+      - ttareungi-network
+
+networks:
+  ttareungi-network:
+    driver: bridge
+
+volumes:
+  redis-data:
