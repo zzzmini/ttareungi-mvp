@@ -122,7 +122,7 @@ services:
       REDIS_PORT: 6379
     volumes:
       - ./ml/models:/models
-    mem_limit: 512m
+    mem_limit: 2G
     networks:
       - ttareungi-network
 
