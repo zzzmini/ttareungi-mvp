@@ -1,0 +1,215 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+header {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.stat-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.stat-value.low {
+    color: #e74c3c;
+}
+
+.search-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#search {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+#search:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+#refresh-btn {
+    padding: 12px 24px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#refresh-btn:hover {
+    background: #5568d3;
+}
+
+#last-update {
+    color: #666;
+    font-size: 0.9em;
+}
+
+main {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 400px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#loading, #error {
+    text-align: center;
+    padding: 50px;
+    color: #666;
+    font-size: 1.2em;
+}
+
+#stations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.station-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.station-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+}
+
+.station-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.bike-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.info-box {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    margin: 0 5px;
+}
+
+.info-label {
+    font-size: 0.8em;
+    color: #666;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.info-value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.change {
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.change.positive {
+    color: #27ae60;
+}
+
+.change.negative {
+    color: #e74c3c;
+}
+
+.timestamp {
+    font-size: 0.8em;
+    color: #999;
+    text-align: center;
+    margin-top: 10px;
+}
+
+footer {
+    text-align: center;
+    color: white;
+    margin-top: 20px;
+    padding: 20px;
+}
+
+.model-badge {
+    text-align: center;
+    padding: 5px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.model-badge.xgboost {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.model-badge.simple {
+    background: #fff3e0;
+    color: #e65100;
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>따릉이 실시간 현황</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header>
+        <h1>🚴 따릉이 실시간 대여소 현황</h1>
+        <div class="stats-summary" id="stats">
+            <div class="stat-item">
+                <span class="stat-label">총 대여소</span>
+                <span class="stat-value" id="total-stations">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">총 자전거</span>
+                <span class="stat-value" id="total-bikes">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">평균 대수</span>
+                <span class="stat-value" id="avg-bikes">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">부족 대여소</span>
+                <span class="stat-value low" id="low-stock">-</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 검색 -->
+    <div class="search-container">
+        <input
+            type="text"
+            id="search"
+            placeholder="🔍 대여소 이름 검색..."
+>
+        <button id="refresh-btn">🔄 새로고침</button>
+        <span id="last-update">마지막 업데이트: -</span>
+    </div>
+
+    <!-- 대여소 목록 -->
+    <main>
+        <div id="loading">데이터 로딩 중...</div>
+        <div id="error" style="display: none;">
+            <p>❌ 데이터를 불러올 수 없습니다.</p>
+            <button onclick="loadStations()">다시 시도</button>
+        </div>
+        <div id="stations-grid"></div>
+    </main>
+
+    <footer>
+        <p>5초마다 자동 업데이트 | 데이터 출처: 서울 열린데이터광장</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
